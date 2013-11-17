@@ -1,0 +1,22 @@
+<assembly>
+	<baseDirectory>/</baseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>/</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>html/**</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>target</directory>
+            <outputDirectory />
+            <includes>
+                <include>WebMarket.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

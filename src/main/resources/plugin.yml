@@ -1,0 +1,7 @@
+name: WebMarket
+main: com.survivorserver.Dasfaust.WebMarket.WebMarket
+version: ${version}
+commands:
+    webmarket:
+        description: WebMarket commands
+depend: [GlobalMarket]
