@@ -27,30 +27,30 @@ public class WebSocketSession {
 	private ChannelHandlerContext ctx;
 	private Gson gson;
 	private WebViewer viewer;
-	
+
 	public WebSocketSession(WebMarket web, ChannelHandlerContext ctx, Gson gson, Logger log) {
 		this.web = web;
 		this.ctx = ctx;
 		this.gson = gson;
 		this.log = log;
 	}
-	
+
 	public ChannelHandlerContext getContext() {
 		return ctx;
 	}
-	
+
 	public void onDisconnect() {
 		if (viewer != null) {
 			web.getHandler().removeViewer(viewer.getName());
 			viewer = null;
 		}
 	}
-	
+
 	public void onMessage(String message) {
 		Request req;
 		try {
 			req = gson.fromJson(message, Request.class);
-		} catch(JsonSyntaxException e) {
+		} catch (JsonSyntaxException e) {
 			e.printStackTrace();
 			send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_INVALID_JSON));
 			return;
@@ -81,118 +81,118 @@ public class WebSocketSession {
 			// Update the viewer's data
 			viewer.updateMeta(web.market, req.meta);
 			// Handle their request
-			switch(req.req) {
+			switch (req.req) {
+			case 1:
+				send(viewer.onLogout());
+				break;
+			case 2:
+				switch (viewer.getMeta().viewType) {
+				case 0:
+					send(viewer.onRequestListings(web.getHandler()));
+					break;
 				case 1:
-					send(viewer.onLogout());
+					send(viewer.onRequestListingsOwned(web.getHandler()));
 					break;
 				case 2:
-					switch(viewer.getMeta().viewType) {
-						case 0:
-							send(viewer.onRequestListings(web.getHandler()));
-							break;
-						case 1:
-							send(viewer.onRequestListingsOwned(web.getHandler()));
-							break;
-						case 2:
-							send(viewer.onRequestMail(web.getHandler()));
-							break;
-						case 3:
-							send(viewer.onRequestListingsCreate(web.getHandler()));
-							break;
-						case 4:
-							send(viewer.onRequestListingsCreate(web.getHandler()));
-							break;
-						default:
-							break;
-					}
+					send(viewer.onRequestMail(web.getHandler()));
+					break;
+				case 3:
+					send(viewer.onRequestListingsCreate(web.getHandler()));
 					break;
 				case 4:
-					try {
-						send(viewer.buy(web.market, (int) Double.parseDouble(req.data.toString())));
-					} catch(Exception e) {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-					}
-					break;
-				case 5:
-					try {
-						send(viewer.cancel(web.market, (int) Double.parseDouble(req.data.toString())));
-					} catch(Exception e) {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-					}
-					break;
-				case 6:
-					if (!web.disableSending(req.meta.viewType)) {
-						try {
-							@SuppressWarnings("unchecked")
-							StringMap<Object> map = (StringMap<Object>) req.data;
-							send(viewer.send(web.getHandler(), new SendRequest(((Double) map.get("id")).intValue(), (String) map.get("name"))));
-							updateView();
-						} catch(Exception e) {
-							e.printStackTrace();
-							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-						}
-					} else {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-					}
-					break;
-				case 7:
-					if (!web.disableCreation(req.meta.viewType)) {
-						try {
-							@SuppressWarnings("unchecked")
-							StringMap<Object> map = (StringMap<Object>) req.data;
-							send(viewer.create(web.getHandler(), new CreateRequest(((Double) map.get("id")).intValue(), ((Double) map.get("amount")).intValue(), (Double) map.get("price"))));
-							updateView();
-						} catch(Exception e) {
-							e.printStackTrace();
-							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-						}
-					} else {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-					}
-				case 8:
-					if (!web.disablePickup()) {
-						try {
-							send(viewer.pickup(web.getHandler(), (int) Double.parseDouble(req.data.toString())));
-						} catch(Exception e) {
-							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-						}
-					} else {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-					}
+					send(viewer.onRequestListingsCreate(web.getHandler()));
 					break;
 				default:
-					send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_UNKNOWN_REQUEST));
 					break;
+				}
+				break;
+			case 4:
+				try {
+					send(viewer.buy(web.market, (int) Double.parseDouble(req.data.toString())));
+				} catch (Exception e) {
+					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+				}
+				break;
+			case 5:
+				try {
+					send(viewer.cancel(web.market, (int) Double.parseDouble(req.data.toString())));
+				} catch (Exception e) {
+					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+				}
+				break;
+			case 6:
+				if (!web.disableSending(req.meta.viewType)) {
+					try {
+						@SuppressWarnings("unchecked")
+						StringMap<Object> map = (StringMap<Object>) req.data;
+						send(viewer.send(web.getHandler(), new SendRequest(((Double) map.get("id")).intValue(), (String) map.get("name"))));
+						updateView();
+					} catch (Exception e) {
+						e.printStackTrace();
+						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+					}
+				} else {
+					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+				}
+				break;
+			case 7:
+				if (!web.disableCreation(req.meta.viewType)) {
+					try {
+						@SuppressWarnings("unchecked")
+						StringMap<Object> map = (StringMap<Object>) req.data;
+						send(viewer.create(web.getHandler(), new CreateRequest(((Double) map.get("id")).intValue(), ((Double) map.get("amount")).intValue(), (Double) map.get("price"))));
+						updateView();
+					} catch (Exception e) {
+						e.printStackTrace();
+						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+					}
+				} else {
+					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+				}
+			case 8:
+				if (!web.disablePickup()) {
+					try {
+						send(viewer.pickup(web.getHandler(), (int) Double.parseDouble(req.data.toString())));
+					} catch (Exception e) {
+						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+					}
+				} else {
+					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+				}
+				break;
+			default:
+				send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_UNKNOWN_REQUEST));
+				break;
 			}
 		}
 	}
-	
+
 	public void updateView() {
-		switch(viewer.getMeta().viewType) {
-			case 0:
-				send(viewer.onRequestListings(web.getHandler()));
-				break;
-			case 1:
-				send(viewer.onRequestListingsOwned(web.getHandler()));
-				break;
-			case 2:
-				send(viewer.onRequestMail(web.getHandler()));
-				break;
-			case 3:
-				send(viewer.onRequestListingsCreate(web.getHandler()));
-				break;
-			case 4:
-				send(viewer.onRequestListingsCreate(web.getHandler()));
-				break;
-			default:
-				break;
+		switch (viewer.getMeta().viewType) {
+		case 0:
+			send(viewer.onRequestListings(web.getHandler()));
+			break;
+		case 1:
+			send(viewer.onRequestListingsOwned(web.getHandler()));
+			break;
+		case 2:
+			send(viewer.onRequestMail(web.getHandler()));
+			break;
+		case 3:
+			send(viewer.onRequestListingsCreate(web.getHandler()));
+			break;
+		case 4:
+			send(viewer.onRequestListingsCreate(web.getHandler()));
+			break;
+		default:
+			break;
 		}
 	}
-	
+
 	public void send(String message) {
 		ctx.channel().writeAndFlush(new TextWebSocketFrame(message));
 	}
-	
+
 	public void send(Reply reply) {
 		ByteBuf buf = Unpooled.copiedBuffer(gson.toJson(reply), CharsetUtil.UTF_8);
 		ctx.channel().writeAndFlush(new TextWebSocketFrame(buf));
