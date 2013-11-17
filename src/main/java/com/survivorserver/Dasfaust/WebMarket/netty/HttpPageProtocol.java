@@ -15,14 +15,14 @@ public class HttpPageProtocol {
 
 	public static ByteBuf getContent(WebMarket web, Gson gson) {
 		StringBuilder sb = new StringBuilder();
-        sb.append("{\"version\":" + "\"" + web.getDescription().getVersion() + "\"");
-        sb.append(",\"protocol\":");
-        sb.append(gson.toJson(Protocol.serialize()));
-        sb.append(",\"viewerMeta\":");
-        sb.append(gson.toJson(ViewerMeta.serialize()));
-        sb.append(",\"request\":");
-        sb.append(gson.toJson(Request.serialize()));
-        sb.append("}");
+	    sb.append("{\"version\":" + "\"" + web.getDescription().getVersion() + "\"");
+	    sb.append(",\"protocol\":");
+	    sb.append(gson.toJson(Protocol.serialize()));
+	    sb.append(",\"viewerMeta\":");
+	    sb.append(gson.toJson(ViewerMeta.serialize()));
+	    sb.append(",\"request\":");
+	    sb.append(gson.toJson(Request.serialize()));
+	    sb.append("}");
 		return Unpooled.copiedBuffer(sb.toString(), CharsetUtil.UTF_8);
 	}
 }

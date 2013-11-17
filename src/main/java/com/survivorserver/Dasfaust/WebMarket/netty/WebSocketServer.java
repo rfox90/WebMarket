@@ -33,43 +33,43 @@ public class WebSocketServer extends Thread {
 	
 	public void run() {
 		bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .childHandler(new ChannelInitializer<SocketChannel>() {
-            	 @Override
-            	    public void initChannel(SocketChannel ch) throws Exception {
-            	        ChannelPipeline pipeline = ch.pipeline();
-            	        pipeline.addLast("codec-http", new HttpServerCodec());
-            	        pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
-            	        final WebSocketServerHandler handler = new WebSocketServerHandler(web, log);
-            	        pipeline.addLast("handler", handler);
-            	        ChannelFuture closeFuture = ch.closeFuture();
-            	        closeFuture.addListener(new ChannelFutureListener() {
-            	            @Override
-            	            public void operationComplete(ChannelFuture future) throws Exception {
-            	            	WebSocketSession ses = handler.findSession(future.channel());
-            	            	if (ses != null) {
-            	            		ses.onDisconnect();
-            	            	}
-            	            }
-            	        });
-            	    }
-             });
-
-            Channel ch = b.bind(port).sync().channel();
-            log.info("Server started on port " + port);
-
-            ch.closeFuture().sync();
-        } catch (InterruptedException e) {
+	    workerGroup = new NioEventLoopGroup();
+	    try {
+	        ServerBootstrap b = new ServerBootstrap();
+	        b.group(bossGroup, workerGroup)
+	         .channel(NioServerSocketChannel.class)
+	         .childHandler(new ChannelInitializer<SocketChannel>() {
+	        	 @Override
+	        	    public void initChannel(SocketChannel ch) throws Exception {
+	        	        ChannelPipeline pipeline = ch.pipeline();
+	        	        pipeline.addLast("codec-http", new HttpServerCodec());
+	        	        pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
+	        	        final WebSocketServerHandler handler = new WebSocketServerHandler(web, log);
+	        	        pipeline.addLast("handler", handler);
+	        	        ChannelFuture closeFuture = ch.closeFuture();
+	        	        closeFuture.addListener(new ChannelFutureListener() {
+	        	            @Override
+	        	            public void operationComplete(ChannelFuture future) throws Exception {
+	        	            	WebSocketSession ses = handler.findSession(future.channel());
+	        	            	if (ses != null) {
+	        	            		ses.onDisconnect();
+	        	            	}
+	        	            }
+	        	        });
+	        	    }
+	         });
+	
+	        Channel ch = b.bind(port).sync().channel();
+	        log.info("Server started on port " + port);
+	
+	        ch.closeFuture().sync();
+	    } catch (InterruptedException e) {
 			log.severe("Couldn't start the server! Is something already running on port " + port + "? Change it and use /webmarket reload");
 		}
 	}
 	
 	public synchronized void shutDown() {
 		bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+	    workerGroup.shutdownGracefully();
 	}
 }
