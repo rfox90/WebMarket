@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Market</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.css" rel="stylesheet" media="screen">
+	<link href="css/market.css" rel="stylesheet">
+	<script src="js/jquery-2.0.3.min.js"></script>
+	<script src="js/jquery.cookie.min.js"></script>
+	<script src="js/market.js"></script>
+	<script src="js/jquery.simplePagination.min.js"></script>
+  </head>
+  <body>
+	<nav style="border-radius: 0;" class="navbar navbar-default" role="navigation">
+	  <div class="navbar-header">
+		<a class="navbar-brand" style="line-height: 34px;"><span style="position: relative; top: 5px; font-size: 17pt; color: #428bca;" class="glyphicon glyphicon-globe"></span> Market</a>
+	  </div>
+	  <ul class="nav navbar-nav Tab" data="MarketTabs">
+		  <li data-market-view="0"><a style="cursor: pointer;">Browse <span id="browse-number" class="badge">0</span></a></li>
+		  <li data-market-view="2"><a style="cursor: pointer;">Mail <span id="mail-number" class="badge">0</span></a></li>
+		</ul>
+		<div class="navbar-right navbar-form">
+			<form id="login" role="login" class="hidden">
+			  <div class="form-group">
+				<input type="text" class="form-control" placeholder="Username">
+			  </div>
+			  <div class="form-group">
+				<input type="password" class="form-control" placeholder="Password">
+			  </div>
+			  <button class="btn btn-success">Sign In</button>
+			</form>
+			<div id="user" class="hidden">
+				<div id="balance"></div>
+				<img id="userimg" src="" />
+				<button id="logout" class="btn btn-warning hidden">Logout</button>
+			</div>
+		</div>
+	</nav>
+  
+	<div class="container">
+		<div id="alert">
+			<div class="progress progress-striped active loadingBar">
+			  <div class="progress-bar progress-bar-warning" role="progressbar"></div>
+			</div>
+		</div>
+		<div id="MarketTabs" class="hidden well">
+			<div id="listings">
+				<ul class="nav nav-tabs Tab" data="ListingsTabs" style="margin-bottom: 0px;">
+				  <li data-market-view="0"><a id="listings-all" style="cursor: pointer;">All</a></li>
+				  <li data-market-view="1"><a id="listings-selling" style="cursor: pointer;">Selling</a></li>
+				  <li data-market-view="3"><a style="cursor: pointer;">Create / Send</a></li>
+				  <li id="browse-search-container" class="pull-right tabNoClick browseSearch">
+				  	<form class="form-inline">
+				  		<div class="form-group">
+				  			<input type="search" class="form-control" id="browse-search-input" placeholder="Search">
+				  		</div>
+				  		<button id="browse-search" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+				  		<button id="browse-search-cancel" class="btn btn-danger btn-sm hidden"><span class="glyphicon glyphicon-ban-circle"></span></button>
+				  	</form>
+				  </li>
+				</ul>
+				<div id="ListingsTabs" class="inner-well">
+					<div>
+						<div id="listings-container"></div>
+					</div>
+					<div id="listings-selling-container">
+					</div>
+					<div>
+						<ul id="create-selector" class="nav nav-tabs Tab" data="CreationTabs">
+							<li data-market-view="3"><a style="cursor: pointer;">My Inventory</a></li>
+							<li data-market-view="4"><a style="cursor: pointer;">My Mail</a></li>
+						</ul>
+						<div style="border: 1px solid #dddddd; border-top: none; padding: 4px;">
+							<div id="create-message" class="callout callout-info"></div>
+							<div id="CreationTabs">
+								<div id="listings-create-container"></div>
+								<div id="listings-create-mail-container"></div>
+							</div>
+							<div id="create-dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								 <div class="modal-dialog">
+								 	<div class="modal-content">
+								 		<div class="modal-header" style="padding: 5px 15px;">
+        									<h4 class="modal-title">List or Send <div style="display: inline-block;" id="create-dialog-selected"></div></h4>
+								 		</div>
+								 		<div class="modal-body">
+								 			<p id="create-alert" class="alert alert-warning hidden"></p>
+								        	<p>
+								        		<h4><code>Send this item</code></h4>
+								        		<form class="form-horizontal" role="form">
+								        			<!--<div class="form-group">
+														<label for="inputSendName" class="col-sm-2 control-label">Player</label>
+														<div class="col-sm-10">
+														  <input type="email" class="form-control" id="inputSendName" placeholder="Player's IGN">
+														</div>
+													</div>
+													<div class="form-group">
+													    <div class="col-sm-offset-2 col-sm-10">
+													      <button type="submit" class="btn btn-success">Send</button>
+													    </div>
+													</div>-->
+													<div class="input-group">
+														<span class="input-group-addon">@</span>
+												    	<input id="create-inputIgn" type="text" class="form-control" placeholder="Player's IGN">
+												      	<span class="input-group-btn">
+												        	<button id="create-send" class="btn btn-success" type="button">Send</button>
+												      	</span>
+												    </div>
+								        		</form>
+								        	</p>
+								        	<p>
+								        		<h4><code>List this item</code></h4>
+								        		<form class="form-horizontal" role="form">
+								        			<div class="form-group">
+														<label for="create-inputPrice" class="col-sm-2 control-label">Price</label>
+														<div class="col-sm-10">
+														  <input type="number" class="form-control" id="create-inputPrice" placeholder="Numbers only">
+														</div>
+													</div>
+													<div class="form-group">
+														<label for="create-inputAmount" class="col-sm-2 control-label">Amount</label>
+														<div class="col-sm-10">
+														  <input type="number" class="form-control" id="create-inputAmount" placeholder="Numbers only">
+														</div>
+													</div>
+													<div class="form-group">
+													    <div class="col-sm-offset-2 col-sm-10">
+													      <button id="create-button"type="submit" class="btn btn-success">Create</button>
+													    </div>
+													</div>
+								        		</form>
+								        	</p>
+								      	</div>
+								      	<div class="modal-footer" style="margin: 0px;">
+									        <button id="create-modal-close" type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+										</div>
+								 	</div>
+								 </div>
+							</div>
+						</div>
+					</div>
+				</div>
+		</div>
+		<div id="mail">
+			<div class="panel panel-default" id="mail-container" style="padding: 10px;"></div>
+			<div id="book-view" class="modal fade" tabindex="-2" aria-hidden="true">
+				 <div class="modal-dialog">
+				 	<div class="modal-content">
+				 		<div class="modal-header" style="padding: 5px 15px;">
+							<h4 id="book-dialog-title" class="modal-title"></h4>
+				 		</div>
+				 		<div class="modal-body">
+				 			<p id="book-dialog-body"></p>
+				      	</div>
+				      	<div class="modal-footer" style="margin: 0px;">
+					        <button type="button" class="btn btn-success" data-dismiss="modal">Okay</button>
+						</div>
+				 	</div>
+				 </div>
+			</div>
+		</div>
+		<div class="panel panel-default paginationContainer tabNoHide">
+				<div class="row">
+					<div class="col-md-9">
+						<ul id="browse-page-container"></ul>
+					</div>
+					<div class="col-md-3">
+						<div style="margin: 15px 0px; font-weight: bold;">Page Size: 
+							<select id='browse-page-size' class="form-control input-sm" style="width: 100px; display: inline-block; margin-left: 10px;">
+								<option>20</option>
+								<option selected="selected">40</option>
+								<option>60</option>
+								<option>80</option>
+								<option>100</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+    <script src="js/tooltipsy.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		$(function() {
+			$('.Tab').each(function(i, obj) {
+				var data = $(this).attr("data");
+				var child = $('#' + data);
+				$(this).children().addClass('tabNav');
+				child.children().addClass('tabPage');
+				child.children().each(function() {
+					if (!$(this).hasClass("tabNoHide")) {
+						$(this).toggleClass('hidden');
+					}
+				});
+				$(this).children(":first").toggleClass('active');
+				child.children(':first').toggleClass('hidden');
+			});
+			$('.tabNav').click(function() {
+				if ($(this).hasClass("tabNoClick")) {
+					return;
+				}
+				var parent = $(this).parent();
+				var index = $(this).index();
+				var prev = parent.children('.active').index();
+				if (index == prev) {
+					return;
+				}
+				var data = parent.attr("data");
+				var child = $('#' + data);
+				child.children().eq(prev).toggleClass('hidden');
+				child.children().eq(index).toggleClass('hidden');
+				parent.children().eq(prev).toggleClass('active');
+				parent.children().eq(index).toggleClass('active');
+				var marketView = $(this).attr("data-market-view");
+				console.log(marketView);
+				if (marketView != null) {
+					viewer.page = 1;
+					if (marketView != 0) {
+						$("#browse-search-container").addClass("hidden");
+					} else {
+						$("#browse-search-container").removeClass("hidden");
+					}
+					if (marketView == 3) {
+						$("#create-selector > li").each(function () {
+							if ($(this).hasClass("active")) {
+								marketView = $(this).attr("data-market-view");
+							}
+						});
+					}
+					updateView(marketView);
+				}
+			});
+		});
+	</script>
+  </body>
+</html>

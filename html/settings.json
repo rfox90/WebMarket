@@ -1,0 +1,57 @@
+{
+"version":"1.0.0-SNAPSHOT",
+"connection":
+	{
+		"address":"survivorserver.com",
+		"port":8080
+	},
+"authentication":
+	{
+		"type":"xenforo",
+		"login_script":"auth/XenForoAuth.php",
+		"forum_login_url":"http://survivorserver.com/login"
+	},
+"locale":
+	{
+		"selected":"english",
+		"english":
+			{
+				"market":"Market",
+				"browser_does_not_support_websockets":"<strong>:( Looks like your browser doesn't support WebSockets!</strong> To use the Market update to a newer browser, like <a href='http://www.google.com/chrome'>Google Chrome</a>.",
+				"cant_connect_to_server":"<strong>Can't connect to the server.</strong> Wait a few minutes and try again.",
+				"server_closed_connection":"Server closed the connection: <strong>{0}</strong>",
+				"welcome":"Welcome to the Market, {0}.",
+				"minotar_address":"https://minotar.net/helm/{0}/{1}.png",
+				"accessing_the_market":"<strong>Accessing The Market</strong>: you need to set a password for Market's web end in-game. You can set a password with <code>/market register &lt;password&gt;</code> Once set, you can log in here with your in-game username and the password you just set.",
+				"please_log_in":"Please log in over <strong><a href='{0}'>here</a></strong>. Once you're logged in you will be able to access Market.",
+				"there_are_no_listings":"There are no listings to show.",
+				"transaction_failure":"Transaction failure: ",
+				"click_an_item":"Click an item to begin.",
+				"there_is_no_mail":"You don't have any mail.",
+				"your_inventory_is_empty":"Your inventory is empty.",
+				"mail_sent_to_inventory":"Mail sent to inventory.",
+				"mail_sent_to_inventory_and_picked_up_earnings":"Sent to inventory and picked up your earnings of {0}.",
+				"response_codes":
+					{
+						"2":"Invalid username or password, please try again.",
+						"3":"You are already logged in somewhere else.",
+						"5":"You have been logged out.",
+						"6":"The server responded with an error, please check the console.",
+						"7":"Your connection has timed out.",
+						"9":"You can't create or send listings here while you're in-game. Hold an item and type <code>/market create &lt;price&gt;</code> to create while in-game.",
+						"10":"You don't seem to have an inventory, have you joined the server before?",
+						"11":"The requested item could not be found.",
+						"12":"You do not have enough money.",
+						"13":"Bad or malformed request.",
+						"14":"Player not found.",
+						"15":"Your price is too high.",
+						"16":"You are selling too many items.",
+						"17":"This item is blacklisted.",
+						"18":"You don't have enough of that item.",
+						"19":"Your inventory is full!",
+						"20":"This action is disabled."
+					}
+				
+			}
+	}
+}
