@@ -47,10 +47,12 @@ public class WebMarket extends JavaPlugin {
 		auth = new AuthManager(this);
 		server = new WebSocketServer(getConfig().getInt("server.port"), getLogger(), this);
 		server.start();
+		market.getCmd().registerSubCommand(new RegisterCommand(market, market.getLocale(), auth));
 	}
 	
 	public void onDisable() {
 		market.getInterfaceHandler().unregisterHandler(handler);
+		market.getCmd().unregisterSubCommand(RegisterCommand.class);
 		server.shutDown();
 	}
 	
