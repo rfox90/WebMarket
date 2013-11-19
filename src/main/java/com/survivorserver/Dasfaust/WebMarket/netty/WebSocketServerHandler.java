@@ -107,7 +107,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		if ("/protocol".equals(req.getUri())) {
 			ByteBuf content = HttpPageProtocol.getContent(web, gson);
 			FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK, content);
-			req.headers().add(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			res.headers().add(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			res.headers().add(ACCESS_CONTROL_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS");
 			res.headers().add(ACCESS_CONTROL_ALLOW_HEADERS, "X-Requested-With, Content-Type, Content-Length");

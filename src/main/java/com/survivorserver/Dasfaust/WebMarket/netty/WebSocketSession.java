@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.libs.com.google.gson.internal.StringMap;
 
 import com.survivorserver.Dasfaust.WebMarket.WebMarket;
 import com.survivorserver.Dasfaust.WebMarket.WebViewer;
+import com.survivorserver.Dasfaust.WebMarket.mojang.profiles.Profile;
 import com.survivorserver.Dasfaust.WebMarket.protocol.CreateRequest;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Reply;
@@ -66,15 +67,21 @@ public class WebSocketSession {
 				}
 				return;
 			} else {
-				if (!web.auth.check(req.meta.name, req.meta.password)) {
-					send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_INVALID_CREDENTIALS));
-				} else if (web.getHandler().getViewer(req.meta.name) != null) {
-					send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_VIEWER_ALREADY_ACTIVE));
+				Profile profile = web.auth.getProfile(req.meta.name);
+				if (profile == null) {
+					send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_PLAYER_NOT_FOUND));
 				} else {
-					viewer = new WebViewer(this, req.meta);
-					web.getHandler().addViewer(viewer);
-					viewer.updateMeta(web.market, req.meta);
-					send(new Reply(Protocol.REPLY_GENERAL_SUCCESS, viewer.getMeta(), Protocol.STATUS_UPDATE_VIEWER));
+					req.meta.name = profile.getName();
+					if (!web.auth.check(req.meta.name, req.meta.password)) {
+						send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_INVALID_CREDENTIALS));
+					} else if (web.getHandler().getViewer(req.meta.name) != null) {
+						send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_VIEWER_ALREADY_ACTIVE));
+					} else {
+						viewer = new WebViewer(this, req.meta);
+						web.getHandler().addViewer(viewer);
+						viewer.updateMeta(web.market, req.meta);
+						send(new Reply(Protocol.REPLY_GENERAL_SUCCESS, viewer.getMeta(), Protocol.STATUS_UPDATE_VIEWER));
+					}
 				}
 			}
 		} else {
