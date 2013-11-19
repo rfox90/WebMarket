@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.survivorserver.Dasfaust.WebMarket.netty.WebSocketServer;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;
 import com.survivorserver.GlobalMarket.Market;
+import com.survivorserver.GlobalMarket.MetricsLite;
 
 public class WebMarket extends JavaPlugin {
 
@@ -30,8 +31,17 @@ public class WebMarket extends JavaPlugin {
 		getConfig().addDefault("interface.disable_create_from_mail", false);
 		getConfig().addDefault("interface.disable_sending_from_mail", false);
 		getConfig().addDefault("interface.disable_mail_pickup", false);
+		getConfig().addDefault("enable_metrics", true);
 		getConfig().options().copyDefaults(true);
 		saveConfig();
+		if (getConfig().getBoolean("enable_metrics")) {
+			try {
+			    MetricsLite metrics = new MetricsLite(this);
+			    metrics.start();
+			} catch (Exception e) {
+			    log.info("Failed to start Metrics!");
+			}
+		}
 		handler = new InterfaceHandler(this);
 		market.getInterfaceHandler().registerHandler(handler);
 		auth = new AuthManager(this);
