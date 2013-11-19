@@ -1,19 +1,20 @@
 <assembly>
+	<id>bin</id>
 	<baseDirectory>/</baseDirectory>
     <formats>
         <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
-            <directory>/</directory>
+            <directory>${project.basedir}</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>html/**</include>
             </includes>
         </fileSet>
         <fileSet>
-            <directory>target</directory>
-            <outputDirectory />
+            <directory>${project.basedir}/target</directory>
+            <outputDirectory>.</outputDirectory>
             <includes>
                 <include>WebMarket.jar</include>
             </includes>
