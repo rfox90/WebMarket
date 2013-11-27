@@ -103,7 +103,7 @@ public class WebViewer {
 		if (listing == null) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
 		}
-		if (!listing.seller.equalsIgnoreCase(meta.name) && market.getInterfaceHandler().isAdmin(meta.name)) {
+		if (!listing.seller.equalsIgnoreCase(meta.name) && !market.getInterfaceHandler().isAdmin(meta.name)) {
 			return new Reply(Protocol.REPLY_GENERAL_FAILURE, meta, Protocol.STATUS_BAD_REQUEST);
 		}
 		market.getCore().removeListing(listing, meta.name);
