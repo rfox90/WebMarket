@@ -196,10 +196,6 @@ public class InterfaceHandler extends Handler {
 				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PLAYER_NOT_FOUND);
 			}
 		}
-		double maxPrice = market.getMaxPrice(meta.name, "");
-		if (maxPrice > 0 && price >= maxPrice) {
-			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
-		}
 		int maxListings = market.maxListings(meta.name, "");
 		if (maxListings > 0 && storage.getNumListingsFor(meta.name, "") >= maxListings) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SELLING_TOO_MANY_ITEMS);
@@ -213,6 +209,10 @@ public class InterfaceHandler extends Handler {
 				}
 				PlayerInventory inv = player.getInventory();
 				ItemStack toList = inv.getItem(id).clone();
+				double maxPrice = market.getMaxPrice(meta.name, "", toList);
+				if (maxPrice > 0 && price >= maxPrice) {
+					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
+				}
 				if (toList == null || toList.getType() == Material.AIR) {
 					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
 				}
@@ -243,6 +243,10 @@ public class InterfaceHandler extends Handler {
 					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_ENOUGH_OF_ITEM);
 				}
 				ItemStack toList = storage.getItem(mail.itemId, amount);
+				double maxPrice = market.getMaxPrice(meta.name, "", toList);
+				if (maxPrice > 0 && price >= maxPrice) {
+					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
+				}
 				if (market.itemBlacklisted(toList)) {
 					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_ITEM_BACLKLISTED);
 				}
