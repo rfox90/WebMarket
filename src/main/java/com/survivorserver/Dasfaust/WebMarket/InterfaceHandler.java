@@ -32,6 +32,7 @@ import com.survivorserver.GlobalMarket.MarketStorage;
 import com.survivorserver.GlobalMarket.HistoryHandler.MarketAction;
 import com.survivorserver.GlobalMarket.Interface.Handler;
 import com.survivorserver.GlobalMarket.Lib.SearchResult;
+import com.survivorserver.GlobalMarket.Lib.SortMethod;
 
 public class InterfaceHandler extends Handler {
 
@@ -67,7 +68,7 @@ public class InterfaceHandler extends Handler {
 		if (meta.search == null || meta.search.length() <= 1) {
 			List<WebItem> listings = new ArrayList<WebItem>();
 			synchronized(market.getStorage()) {
-				for (Listing listing : storage.getListings(meta.name, meta.page, meta.pageSize, "")) {
+				for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, "")) {
 					listings.add(new WebItem(market, listing));
 				}
 				return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
@@ -75,7 +76,7 @@ public class InterfaceHandler extends Handler {
 		} else {
 			List<WebItem> listings = new ArrayList<WebItem>();
 			synchronized(market.getStorage()) {
-				SearchResult search = storage.getListings(meta.name, meta.page, meta.pageSize, meta.search, "");
+				SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, meta.search, "");
 				for (Listing listing : search.getPage()) {
 					listings.add(new WebItem(market, listing));
 				}
