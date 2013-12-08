@@ -2,9 +2,9 @@ package com.survivorserver.Dasfaust.WebMarket.netty;
 
 import java.util.logging.Logger;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
-import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
-import org.bukkit.craftbukkit.libs.com.google.gson.internal.StringMap;
+import net.minecraft.util.com.google.gson.Gson;
+import net.minecraft.util.com.google.gson.JsonSyntaxException;
+import net.minecraft.util.com.google.gson.internal.LinkedTreeMap;
 
 import com.survivorserver.Dasfaust.WebMarket.WebMarket;
 import com.survivorserver.Dasfaust.WebMarket.WebViewer;
@@ -131,7 +131,7 @@ public class WebSocketSession {
 				if (!web.disableSending(req.meta.viewType)) {
 					try {
 						@SuppressWarnings("unchecked")
-						StringMap<Object> map = (StringMap<Object>) req.data;
+						LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
 						send(viewer.send(web.getHandler(), new SendRequest(((Double) map.get("id")).intValue(), (String) map.get("name"))));
 						updateView();
 					} catch (Exception e) {
@@ -146,7 +146,7 @@ public class WebSocketSession {
 				if (!web.disableCreation(req.meta.viewType)) {
 					try {
 						@SuppressWarnings("unchecked")
-						StringMap<Object> map = (StringMap<Object>) req.data;
+						LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
 						send(viewer.create(web.getHandler(), new CreateRequest(((Double) map.get("id")).intValue(), ((Double) map.get("amount")).intValue(), (Double) map.get("price"))));
 						updateView();
 					} catch (Exception e) {

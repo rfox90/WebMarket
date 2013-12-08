@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import net.minecraft.util.com.google.gson.Gson;
 
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.BasicHttpClient;
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.HttpBody;
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.HttpClient;
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.HttpHeader;
-
 
 public class HttpProfileRepository implements ProfileRepository {
 
