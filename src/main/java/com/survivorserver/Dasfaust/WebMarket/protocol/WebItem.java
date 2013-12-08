@@ -90,6 +90,7 @@ public class WebItem {
 	public int maxDamage;
 	boolean isTool;
 	boolean isInfinite = false;
+	public int siblingCount = 0;
 	
 	/*
 	 * Listing constructor
@@ -127,6 +128,9 @@ public class WebItem {
 		price = listing.getPrice();
 		friendlyPrice = market.getEcon().format(price);
 		isInfinite = listing.getSeller().equalsIgnoreCase(market.getInfiniteSeller());
+		for (Listing l : listing.getSiblings()) {
+			siblingCount += l.getAmount();
+		}
 	}
 	
 	public WebItem(Market market, Mail mail) {

@@ -67,7 +67,7 @@ public class InterfaceHandler extends Handler {
 		if (meta.search == null || meta.search.length() <= 1) {
 			List<WebItem> listings = new ArrayList<WebItem>();
 			synchronized(market.getStorage()) {
-				for (Listing listing : storage.getListings(meta.page, meta.pageSize, "")) {
+				for (Listing listing : storage.getListings(meta.name, meta.page, meta.pageSize, "")) {
 					listings.add(new WebItem(market, listing));
 				}
 				return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
@@ -75,7 +75,7 @@ public class InterfaceHandler extends Handler {
 		} else {
 			List<WebItem> listings = new ArrayList<WebItem>();
 			synchronized(market.getStorage()) {
-				SearchResult search = storage.getListings(meta.page, meta.pageSize, meta.search, "");
+				SearchResult search = storage.getListings(meta.name, meta.page, meta.pageSize, meta.search, "");
 				for (Listing listing : search.getPage()) {
 					listings.add(new WebItem(market, listing));
 				}
@@ -248,7 +248,7 @@ public class InterfaceHandler extends Handler {
 				storage.createListing(meta.name, toList, price, "");
 				if (amount < mail.getAmount()) {
 					mail.amount = mail.amount - amount;
-					market.getInterfaceHandler().refreshViewer(meta.name);
+					market.getInterfaceHandler().refreshViewer(meta.name, "Mail");
 				} else {
 					storage.removeMail(id);
 				}
