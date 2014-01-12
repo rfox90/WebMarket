@@ -128,7 +128,7 @@ public class WebItem {
 		price = listing.getPrice();
 		friendlyPrice = market.getEcon().format(price);
 		isInfinite = listing.getSeller().equalsIgnoreCase(market.getInfiniteSeller());
-		for (Listing l : listing.getSiblings()) {
+		for (Listing l : listing.getStacked()) {
 			siblingCount += l.getAmount();
 		}
 	}

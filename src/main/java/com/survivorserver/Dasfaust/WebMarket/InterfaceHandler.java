@@ -67,32 +67,26 @@ public class InterfaceHandler extends Handler {
 	public ItemList getListings(ViewerMeta meta) {
 		if (meta.search == null || meta.search.length() <= 1) {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			synchronized(market.getStorage()) {
-				for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, "")) {
-					listings.add(new WebItem(market, listing));
-				}
-				return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
+			for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, "")) {
+				listings.add(new WebItem(market, listing));
 			}
+			return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
 		} else {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			synchronized(market.getStorage()) {
-				SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, meta.search, "");
-				for (Listing listing : search.getPage()) {
-					listings.add(new WebItem(market, listing));
-				}
-				return new ItemList(Protocol.VIEWTYPE_LISTINGS, search.getTotalFound(), listings);
+			SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, meta.search, "");
+			for (Listing listing : search.getPage()) {
+				listings.add(new WebItem(market, listing));
 			}
+			return new ItemList(Protocol.VIEWTYPE_LISTINGS, search.getTotalFound(), listings);
 		}
 	}
 	
 	public ItemList getOwnedListings(ViewerMeta meta) {
 		List<WebItem> listings = new ArrayList<WebItem>();
-		synchronized(market.getStorage()) {
-			for (Listing listing : storage.getOwnedListings(meta.page, meta.pageSize, "", meta.name)) {
-				listings.add(new WebItem(market, listing));
-			}
-			return new ItemList(Protocol.VIEWTYPE_LISTINGS_OWNED, storage.getAllListings().size(), listings);
+		for (Listing listing : storage.getOwnedListings(meta.page, meta.pageSize, "", meta.name)) {
+			listings.add(new WebItem(market, listing));
 		}
+		return new ItemList(Protocol.VIEWTYPE_LISTINGS_OWNED, storage.getAllListings().size(), listings);
 	}
 	
 	public ItemList getMail(ViewerMeta meta) {
@@ -150,31 +144,29 @@ public class InterfaceHandler extends Handler {
 				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PLAYER_NOT_FOUND);
 			}
 		}
-		synchronized(market.getStorage()) {
-			if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
-				IOfflinePlayer player = new IOfflinePlayer(meta.name);
-				if (!player.exists()) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
-				}
-				PlayerInventory inv = player.getInventory();
-				ItemStack toSend = inv.getItem(id);
-				if (toSend == null || toSend.getType() == Material.AIR) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
-				}
-				storage.createMail(name, meta.name, toSend, 0, "");
-				inv.setItem(id, new ItemStack(Material.AIR));
-				player.setInventory(inv);
-				player.savePlayerData();
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, name);
-			} else {
-				Mail mail = storage.getMail(id);
-				if (mail == null) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
-				}
-				storage.createMail(name, meta.name, mail.itemId, mail.amount, "");
-				storage.removeMail(id);
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, name);
+		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+			IOfflinePlayer player = new IOfflinePlayer(meta.name);
+			if (!player.exists()) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
 			}
+			PlayerInventory inv = player.getInventory();
+			ItemStack toSend = inv.getItem(id);
+			if (toSend == null || toSend.getType() == Material.AIR) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
+			}
+			storage.createMail(name, meta.name, toSend, 0, "");
+			inv.setItem(id, new ItemStack(Material.AIR));
+			player.setInventory(inv);
+			player.savePlayerData();
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, name);
+		} else {
+			Mail mail = storage.getMail(id);
+			if (mail == null) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
+			}
+			storage.createMail(name, meta.name, mail.itemId, mail.amount, "");
+			storage.removeMail(id);
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, name);
 		}
 	}
 	
@@ -201,64 +193,62 @@ public class InterfaceHandler extends Handler {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SELLING_TOO_MANY_ITEMS);
 		}
 		// TODO fees
-		synchronized(market.getStorage()) {
-			if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
-				IOfflinePlayer player = new IOfflinePlayer(meta.name);
-				if (!player.exists()) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
-				}
-				PlayerInventory inv = player.getInventory();
-				ItemStack toList = inv.getItem(id).clone();
-				double maxPrice = market.getMaxPrice(meta.name, "", toList);
-				if (maxPrice > 0 && price >= maxPrice) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
-				}
-				if (toList == null || toList.getType() == Material.AIR) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
-				}
-				if (market.itemBlacklisted(toList)) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_ITEM_BACLKLISTED);
-				}
-				if (amount > toList.getAmount()) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_ENOUGH_OF_ITEM);
-				}
-				if (amount < toList.getAmount()) {
-					ItemStack keep = toList.clone();
-					keep.setAmount(toList.getAmount() - amount);
-					toList.setAmount(amount);
-					inv.setItem(id, keep);
-				} else {
-					inv.setItem(id, new ItemStack(Material.AIR));
-					player.setInventory(inv);
-					player.savePlayerData();
-				}
-				storage.createListing(meta.name, toList, price, "");
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, null);
-			} else {
-				Mail mail = storage.getMail(id);
-				if (mail == null) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
-				}
-				if (amount > mail.getAmount()) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_ENOUGH_OF_ITEM);
-				}
-				ItemStack toList = storage.getItem(mail.itemId, amount);
-				double maxPrice = market.getMaxPrice(meta.name, "", toList);
-				if (maxPrice > 0 && price >= maxPrice) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
-				}
-				if (market.itemBlacklisted(toList)) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_ITEM_BACLKLISTED);
-				}
-				storage.createListing(meta.name, toList, price, "");
-				if (amount < mail.getAmount()) {
-					mail.amount = mail.amount - amount;
-					market.getInterfaceHandler().refreshViewer(meta.name, "Mail");
-				} else {
-					storage.removeMail(id);
-				}
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, null);
+		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+			IOfflinePlayer player = new IOfflinePlayer(meta.name);
+			if (!player.exists()) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
 			}
+			PlayerInventory inv = player.getInventory();
+			ItemStack toList = inv.getItem(id).clone();
+			double maxPrice = market.getMaxPrice(meta.name, "", toList);
+			if (maxPrice > 0 && price >= maxPrice) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
+			}
+			if (toList == null || toList.getType() == Material.AIR) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
+			}
+			if (market.itemBlacklisted(toList)) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_ITEM_BACLKLISTED);
+			}
+			if (amount > toList.getAmount()) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_ENOUGH_OF_ITEM);
+			}
+			if (amount < toList.getAmount()) {
+				ItemStack keep = toList.clone();
+				keep.setAmount(toList.getAmount() - amount);
+				toList.setAmount(amount);
+				inv.setItem(id, keep);
+			} else {
+				inv.setItem(id, new ItemStack(Material.AIR));
+				player.setInventory(inv);
+				player.savePlayerData();
+			}
+			storage.createListing(meta.name, toList, price, "");
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, null);
+		} else {
+			Mail mail = storage.getMail(id);
+			if (mail == null) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
+			}
+			if (amount > mail.getAmount()) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_ENOUGH_OF_ITEM);
+			}
+			ItemStack toList = storage.getItem(mail.itemId, amount);
+			double maxPrice = market.getMaxPrice(meta.name, "", toList);
+			if (maxPrice > 0 && price >= maxPrice) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PRICE_TOO_HIGH);
+			}
+			if (market.itemBlacklisted(toList)) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_ITEM_BACLKLISTED);
+			}
+			storage.createListing(meta.name, toList, price, "");
+			if (amount < mail.getAmount()) {
+				mail.amount = mail.amount - amount;
+				market.getInterfaceHandler().refreshViewer(meta.name, "Mail");
+			} else {
+				storage.removeMail(id);
+			}
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, null);
 		}
 	}
 	
@@ -267,60 +257,58 @@ public class InterfaceHandler extends Handler {
 		if (mail == null) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
 		}
-		synchronized(market.getStorage()) {
-			Player player = web.getServer().getPlayer(meta.name);
-			if (player != null) {
-				Inventory inv = player.getInventory();
-				if (inv.firstEmpty() == -1) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_FULL_INVENTORY);
-				}
-				double amount = mail.getPickup();
-				if (amount > 0) {
-					EconomyResponse response = market.getEcon().depositPlayer(meta.name, amount);
-					if (!response.transactionSuccess()) {
-						if (response.type == ResponseType.NOT_IMPLEMENTED) {
-							market.log.severe(market.getEcon().getName() + " may not be compatible with GlobalMarket. It does not support the depositPlayer() function.");
-						}
-						return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SERVER_ERROR);
-					}
-					player.sendMessage(ChatColor.GREEN + market.getLocale().get("picked_up_your_earnings", market.getEcon().format(market.getEcon().getBalance(player.getName()))));
-					market.getStorage().nullifyMailPayment(mail.getId());
-					if (market.enableHistory()) {
-						market.getHistory().storeHistory(player.getName(), "You", MarketAction.EARNINGS_RETRIEVED, mail.getItemId(), mail.getAmount(), amount);
-					}
-				}
-				inv.addItem(storage.getItem(mail.getItemId(), mail.getAmount()));
-				storage.removeMail(mail.getId());
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, amount > 0 ? market.getEcon().format(amount) : null);
-			} else {
-				IOfflinePlayer offPlayer = new IOfflinePlayer(meta.name);
-				if (!offPlayer.exists()) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
-				}
-				PlayerInventory inv = offPlayer.getInventory();
-				if (inv.firstEmpty() == -1) {
-					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_FULL_INVENTORY);
-				}
-				double amount = mail.getPickup();
-				if (amount > 0) {
-					EconomyResponse response = market.getEcon().depositPlayer(meta.name, amount);
-					if (!response.transactionSuccess()) {
-						if (response.type == ResponseType.NOT_IMPLEMENTED) {
-							market.log.severe(market.getEcon().getName() + " may not be compatible with GlobalMarket. It does not support the depositPlayer() function.");
-						}
-						return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SERVER_ERROR);
-					}
-					market.getStorage().nullifyMailPayment(mail.getId());
-					if (market.enableHistory()) {
-						market.getHistory().storeHistory(meta.name, "You", MarketAction.EARNINGS_RETRIEVED, mail.getItemId(), mail.getAmount(), amount);
-					}
-				}
-				inv.addItem(storage.getItem(mail.getItemId(), mail.getAmount()));
-				storage.removeMail(mail.getId());
-				offPlayer.setInventory(inv);
-				offPlayer.savePlayerData();
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, amount > 0 ? market.getEcon().format(amount) : null);
+		Player player = web.getServer().getPlayer(meta.name);
+		if (player != null) {
+			Inventory inv = player.getInventory();
+			if (inv.firstEmpty() == -1) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_FULL_INVENTORY);
 			}
+			double amount = mail.getPickup();
+			if (amount > 0) {
+				EconomyResponse response = market.getEcon().depositPlayer(meta.name, amount);
+				if (!response.transactionSuccess()) {
+					if (response.type == ResponseType.NOT_IMPLEMENTED) {
+						market.log.severe(market.getEcon().getName() + " may not be compatible with GlobalMarket. It does not support the depositPlayer() function.");
+					}
+					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SERVER_ERROR);
+				}
+				player.sendMessage(ChatColor.GREEN + market.getLocale().get("picked_up_your_earnings", market.getEcon().format(market.getEcon().getBalance(player.getName()))));
+				market.getStorage().nullifyMailPayment(mail.getId());
+				if (market.enableHistory()) {
+					market.getHistory().storeHistory(player.getName(), "You", MarketAction.EARNINGS_RETRIEVED, mail.getItemId(), mail.getAmount(), amount);
+				}
+			}
+			inv.addItem(storage.getItem(mail.getItemId(), mail.getAmount()));
+			storage.removeMail(mail.getId());
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, amount > 0 ? market.getEcon().format(amount) : null);
+		} else {
+			IOfflinePlayer offPlayer = new IOfflinePlayer(meta.name);
+			if (!offPlayer.exists()) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
+			}
+			PlayerInventory inv = offPlayer.getInventory();
+			if (inv.firstEmpty() == -1) {
+				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_FULL_INVENTORY);
+			}
+			double amount = mail.getPickup();
+			if (amount > 0) {
+				EconomyResponse response = market.getEcon().depositPlayer(meta.name, amount);
+				if (!response.transactionSuccess()) {
+					if (response.type == ResponseType.NOT_IMPLEMENTED) {
+						market.log.severe(market.getEcon().getName() + " may not be compatible with GlobalMarket. It does not support the depositPlayer() function.");
+					}
+					return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SERVER_ERROR);
+				}
+				market.getStorage().nullifyMailPayment(mail.getId());
+				if (market.enableHistory()) {
+					market.getHistory().storeHistory(meta.name, "You", MarketAction.EARNINGS_RETRIEVED, mail.getItemId(), mail.getAmount(), amount);
+				}
+			}
+			inv.addItem(storage.getItem(mail.getItemId(), mail.getAmount()));
+			storage.removeMail(mail.getId());
+			offPlayer.setInventory(inv);
+			offPlayer.savePlayerData();
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, amount > 0 ? market.getEcon().format(amount) : null);
 		}
 	}
 	

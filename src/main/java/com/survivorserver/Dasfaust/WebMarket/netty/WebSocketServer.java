@@ -1,5 +1,6 @@
 package com.survivorserver.Dasfaust.WebMarket.netty;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.survivorserver.Dasfaust.WebMarket.WebMarket;
@@ -24,11 +25,15 @@ public class WebSocketServer extends Thread {
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 	private WebMarket web;
+	private AtomicBoolean run;
+	
 
 	public WebSocketServer(int port, Logger log, WebMarket web) {
 		this.port = port;
 		this.log = log;
 		this.web = web;
+		run = new AtomicBoolean();
+		run.set(true);
 	}
 
 	public void run() {
@@ -56,18 +61,30 @@ public class WebSocketServer extends Thread {
 					});
 				}
 			});
-
-			Channel ch = b.bind(port).sync().channel();
+			
+			ChannelFuture future = b.bind(port).sync();
+			if (!future.isSuccess()) {
+				log.severe("Couldn't start the server! Is something already running on port " + port + "? Change it and use /webmarket reload");
+				bossGroup.shutdownGracefully().await();
+				workerGroup.shutdownGracefully().await();
+				return;
+			}
+			Channel ch = future.channel();
 			log.info("Server started on port " + port);
 
-			ch.closeFuture().sync();
-		} catch (InterruptedException e) {
-			log.severe("Couldn't start the server! Is something already running on port " + port + "? Change it and use /webmarket reload");
-		}
+			while(run.get()) {}
+			ch.close().syncUninterruptibly();
+			ch.pipeline().close().syncUninterruptibly();
+			bossGroup.shutdownGracefully().await();
+			workerGroup.shutdownGracefully().await();
+			run.set(true);
+			
+		} catch (InterruptedException ignored) {}
 	}
 
 	public synchronized void shutDown() {
-		bossGroup.shutdownGracefully();
-		workerGroup.shutdownGracefully();
+		run.set(false);
+		while(!run.get()) {}
+		log.info("Server stopped");
 	}
 }

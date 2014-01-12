@@ -2,6 +2,8 @@ package com.survivorserver.Dasfaust.WebMarket.netty;
 
 import java.util.logging.Logger;
 
+import org.bukkit.scheduler.BukkitRunnable;
+
 import net.minecraft.util.com.google.gson.Gson;
 import net.minecraft.util.com.google.gson.JsonSyntaxException;
 import net.minecraft.util.com.google.gson.internal.LinkedTreeMap;
@@ -48,7 +50,7 @@ public class WebSocketSession {
 	}
 
 	public void onMessage(String message) {
-		Request req;
+		final Request req;
 		try {
 			req = gson.fromJson(message, Request.class);
 		} catch (JsonSyntaxException e) {
@@ -89,9 +91,11 @@ public class WebSocketSession {
 			viewer.updateMeta(web.market, req.meta);
 			// Handle their request
 			switch (req.req) {
+			// Logout
 			case 1:
 				send(viewer.onLogout());
 				break;
+			// Update view
 			case 2:
 				switch (viewer.getMeta().viewType) {
 				case 0:
@@ -113,59 +117,88 @@ public class WebSocketSession {
 					break;
 				}
 				break;
+			// Purchase
 			case 4:
-				try {
-					send(viewer.buy(web.market, (int) Double.parseDouble(req.data.toString())));
-				} catch (Exception e) {
-					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-				}
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						try {
+							send(viewer.buy(web.market, (int) Double.parseDouble(req.data.toString())));
+						} catch (Exception e) {
+							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+						}
+					}
+				}.runTask(web);
 				break;
+			// Cancel
 			case 5:
-				try {
-					send(viewer.cancel(web.market, (int) Double.parseDouble(req.data.toString())));
-				} catch (Exception e) {
-					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
-				}
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						try {
+							send(viewer.cancel(web.market, (int) Double.parseDouble(req.data.toString())));
+						} catch (Exception e) {
+							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+						}
+					}
+				}.runTask(web);
 				break;
+			// Send
 			case 6:
-				if (!web.disableSending(req.meta.viewType)) {
-					try {
-						@SuppressWarnings("unchecked")
-						LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
-						send(viewer.send(web.getHandler(), new SendRequest(((Double) map.get("id")).intValue(), (String) map.get("name"))));
-						updateView();
-					} catch (Exception e) {
-						e.printStackTrace();
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						if (!web.disableSending(req.meta.viewType)) {
+							try {
+								@SuppressWarnings("unchecked")
+								LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
+								send(viewer.send(web.getHandler(), new SendRequest(((Double) map.get("id")).intValue(), (String) map.get("name"))));
+								updateView();
+							} catch (Exception e) {
+								e.printStackTrace();
+								send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+							}
+						} else {
+							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+						}
 					}
-				} else {
-					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-				}
+				}.runTask(web);
 				break;
+			// Create
 			case 7:
-				if (!web.disableCreation(req.meta.viewType)) {
-					try {
-						@SuppressWarnings("unchecked")
-						LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
-						send(viewer.create(web.getHandler(), new CreateRequest(((Double) map.get("id")).intValue(), ((Double) map.get("amount")).intValue(), (Double) map.get("price"))));
-						updateView();
-					} catch (Exception e) {
-						e.printStackTrace();
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						if (!web.disableCreation(req.meta.viewType)) {
+							try {
+								@SuppressWarnings("unchecked")
+								LinkedTreeMap<String, Object> map = (LinkedTreeMap<String, Object>) req.data;
+								send(viewer.create(web.getHandler(), new CreateRequest(((Double) map.get("id")).intValue(), ((Double) map.get("amount")).intValue(), (Double) map.get("price"))));
+								updateView();
+							} catch (Exception e) {
+								e.printStackTrace();
+								send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+							}
+						} else {
+							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+						}
 					}
-				} else {
-					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-				}
+				}.runTask(web);
 			case 8:
-				if (!web.disablePickup()) {
-					try {
-						send(viewer.pickup(web.getHandler(), (int) Double.parseDouble(req.data.toString())));
-					} catch (Exception e) {
-						send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						if (!web.disablePickup()) {
+							try {
+								send(viewer.pickup(web.getHandler(), (int) Double.parseDouble(req.data.toString())));
+							} catch (Exception e) {
+								send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_BAD_REQUEST));
+							}
+						} else {
+							send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
+						}
 					}
-				} else {
-					send(new Reply(Protocol.REPLY_TRANSACTION_FAILURE, viewer.getMeta(), Protocol.STATUS_DISABLED_BY_SERVER));
-				}
+				}.runTask(web);
 				break;
 			default:
 				send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_UNKNOWN_REQUEST));

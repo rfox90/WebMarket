@@ -83,18 +83,16 @@ public class WebViewer {
 	}
 	
 	public Reply buy(Market market, int id) {
-		MarketStorage storage = market.getStorage();
-		synchronized(storage.getAllListings()) {
-			Listing listing = storage.getListing(id);
-			if (listing == null) {
-				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
-			}
-			if (market.getCore().buyListing(listing, meta.name, true, true)) {
-				updateMeta(market);
-				return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, id);
-			} else {
-				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_INSUFFICIENT_FUNDS);
-			}
+		MarketStorage storage = market.getStorage();	
+		Listing listing = storage.getListing(id);
+		if (listing == null) {
+			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NOT_FOUND);
+		}
+		if (market.getCore().buyListing(listing, meta.name, true, true)) {
+			updateMeta(market);
+			return new Reply(Protocol.REPLY_TRANSACTION_SUCCESS, meta, id);
+		} else {
+			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_INSUFFICIENT_FUNDS);
 		}
 	}
 	

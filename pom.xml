@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.0.11.Final</version>
+			<version>4.0.13.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -81,6 +81,9 @@
 							<exclude>org.bukkit:craftbukkit</exclude>
 							<exclude>net.milkbowl.vault:Vault</exclude>
 							<exclude>com.survivorserver.Dasfaust:GlobalMarket</exclude>
+							<exclude>com.comphenix.protocol:ProtocolLib</exclude>
+							<exclude>com.comphenix.executors:BukkitExecutors</exclude>
+							<exclude>cglib:cglib-nodep</exclude>
 						</excludes>
 					</artifactSet>
 					<filters>
@@ -97,6 +100,16 @@
 							</excludes>
 						</filter>
 					</filters>
+					<relocations>
+		                <relocation>
+		                  <pattern>io.netty</pattern>
+		                  <shadedPattern>webmarket.lib.io.netty</shadedPattern>
+		                </relocation>
+		                <relocation>
+		                  <pattern>org.apache.commons.codec</pattern>
+		                  <shadedPattern>webmarket.lib.org.apache.commons.codec</shadedPattern>
+		                </relocation>
+		              </relocations>
 				</configuration>
 			</plugin>
 			<plugin>
