@@ -1,6 +1,5 @@
 package com.survivorserver.Dasfaust.WebMarket.netty;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.survivorserver.Dasfaust.WebMarket.WebMarket;
@@ -24,16 +23,14 @@ public class WebSocketServer extends Thread {
 	private final int port;
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
+	private Channel ch;
 	private WebMarket web;
-	private AtomicBoolean run;
 	
 
 	public WebSocketServer(int port, Logger log, WebMarket web) {
 		this.port = port;
 		this.log = log;
 		this.web = web;
-		run = new AtomicBoolean();
-		run.set(true);
 	}
 
 	public void run() {
@@ -69,22 +66,21 @@ public class WebSocketServer extends Thread {
 				workerGroup.shutdownGracefully().await();
 				return;
 			}
-			Channel ch = future.channel();
+			ch = future.channel();
 			log.info("Server started on port " + port);
-
-			while(run.get()) {}
-			ch.close().syncUninterruptibly();
-			ch.pipeline().close().syncUninterruptibly();
-			bossGroup.shutdownGracefully().await();
-			workerGroup.shutdownGracefully().await();
-			run.set(true);
+			ch.closeFuture().sync();
 			
-		} catch (InterruptedException ignored) {}
+		} catch (InterruptedException ignored) {
+			shutDown();
+		}
 	}
 
 	public synchronized void shutDown() {
-		run.set(false);
-		while(!run.get()) {}
+		log.info("Stopping server...");
+		ch.close().syncUninterruptibly();
+		ch.pipeline().close().syncUninterruptibly();
+		bossGroup.shutdownGracefully().awaitUninterruptibly();
+		workerGroup.shutdownGracefully().awaitUninterruptibly();
 		log.info("Server stopped");
 	}
 }
