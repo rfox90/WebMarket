@@ -67,13 +67,13 @@ public class InterfaceHandler extends Handler {
 	public ItemList getListings(ViewerMeta meta) {
 		if (meta.search == null || meta.search.length() <= 1) {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, "")) {
+			for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT,"")) {
 				listings.add(new WebItem(market, listing));
 			}
 			return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
 		} else {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.page, meta.pageSize, meta.search, "");
+			SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.search,"");
 			for (Listing listing : search.getPage()) {
 				listings.add(new WebItem(market, listing));
 			}
@@ -83,7 +83,7 @@ public class InterfaceHandler extends Handler {
 	
 	public ItemList getOwnedListings(ViewerMeta meta) {
 		List<WebItem> listings = new ArrayList<WebItem>();
-		for (Listing listing : storage.getOwnedListings(meta.page, meta.pageSize, "", meta.name)) {
+		for (Listing listing : storage.getOwnedListings("",meta.name)) {
 			listings.add(new WebItem(market, listing));
 		}
 		return new ItemList(Protocol.VIEWTYPE_LISTINGS_OWNED, storage.getAllListings().size(), listings);
@@ -91,7 +91,7 @@ public class InterfaceHandler extends Handler {
 	
 	public ItemList getMail(ViewerMeta meta) {
 		List<WebItem> mail = new ArrayList<WebItem>();
-		for (Mail m : storage.getMail(meta.name, meta.page, meta.pageSize, "")) {
+		for (Mail m : storage.getMail(meta.name, "", SortMethod.DEFAULT)) {
 			mail.add(new WebItem(market, m));
 		}
 		return new ItemList(Protocol.VIEWTYPE_MAIL, mail.size(), mail);
@@ -123,7 +123,7 @@ public class InterfaceHandler extends Handler {
 	
 	public ItemList getMailForCreation(ViewerMeta meta) {
 		List<WebItem> mail = new ArrayList<WebItem>();
-		for (Mail m : storage.getMail(meta.name, meta.page, meta.pageSize, "")) {
+		for (Mail m : storage.getMail(meta.name,"", SortMethod.DEFAULT)) {
 			mail.add(new WebItem(market, m));
 		}
 		return new ItemList(Protocol.VIEWTYPE_CREATE_FROM_MAIL, mail.size(), mail);
