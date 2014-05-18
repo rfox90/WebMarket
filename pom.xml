@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
 			<artifactId>Vault</artifactId>
-			<version>1.2.26-SNAPSHOT</version>
+			<version>1.2.32</version>
 		</dependency>
 		<dependency>
 			<groupId>com.survivorserver.Dasfaust</groupId>
