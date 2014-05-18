@@ -1,6 +1,6 @@
 package com.survivorserver.Dasfaust.WebMarket.netty;
 
-import net.minecraft.util.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 
 import com.survivorserver.Dasfaust.WebMarket.WebMarket;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;

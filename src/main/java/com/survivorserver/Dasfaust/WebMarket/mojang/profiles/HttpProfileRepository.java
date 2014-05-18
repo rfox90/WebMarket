@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.minecraft.util.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.BasicHttpClient;
 import com.survivorserver.Dasfaust.WebMarket.mojang.http.HttpBody;
