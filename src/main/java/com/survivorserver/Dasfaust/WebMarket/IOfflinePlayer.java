@@ -28,32 +28,32 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.AttributeMapBase;
+import net.minecraft.server.v1_7_R3.AttributeMapBase;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.AttributeMapServer;
+import net.minecraft.server.v1_7_R3.AttributeMapServer;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.GenericAttributes;
+import net.minecraft.server.v1_7_R3.GenericAttributes;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.InventoryEnderChest;
+import net.minecraft.server.v1_7_R3.InventoryEnderChest;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagCompound;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.NBTTagList;
+import net.minecraft.server.v1_7_R3.NBTTagList;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.PlayerAbilities;
+import net.minecraft.server.v1_7_R3.PlayerAbilities;
 /*Import must be updated to match each new version*/
-import net.minecraft.server.v1_7_R1.PlayerInventory;
+import net.minecraft.server.v1_7_R3.PlayerInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 /*Import must be updated to match each new version*/
-import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftInventory;
 /*Import must be updated to match each new version*/
-import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftInventoryPlayer;
+import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.Inventory;
 
 /**
