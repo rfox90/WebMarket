@@ -10,7 +10,7 @@
 		</repository>
 		<repository>
 			<id>milkbowl-repo</id>
-			<url>http://ci.herocraftonline.com/plugin/repository/everything</url>
+			<url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
 		</repository>
 		<repository>
 			<id>maven-repo</id>
@@ -21,17 +21,17 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>LATEST</version>
+			<version>1.6.4-R2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>craftbukkit</artifactId>
-			<version>LATEST</version>
+			<version>1.6.4-R2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
-			<artifactId>Vault</artifactId>
-			<version>1.2.26-SNAPSHOT</version>
+            <artifactId>Vault</artifactId>
+            <version>1.2.32</version>
 		</dependency>
 		<dependency>
 			<groupId>com.survivorserver.Dasfaust</groupId>
