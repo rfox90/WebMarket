@@ -16,6 +16,7 @@ import com.survivorserver.Dasfaust.WebMarket.protocol.Reply;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Request;
 import com.survivorserver.Dasfaust.WebMarket.protocol.RequestCode;
 import com.survivorserver.Dasfaust.WebMarket.protocol.SendRequest;
+import com.survivorserver.GlobalMarket.Market;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -200,6 +201,9 @@ public class WebSocketSession {
 						}
 					}
 				}.runTask(web);
+				break;
+			case WORLD_LIST:
+				send(new Reply(Protocol.REPLY_WORLD_LIST,viewer.getMeta(),"test"));
 				break;
 			default:
 				this.log.info("Unmapable request");
