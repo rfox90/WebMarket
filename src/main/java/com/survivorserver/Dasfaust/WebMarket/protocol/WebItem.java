@@ -1,5 +1,6 @@
 package com.survivorserver.Dasfaust.WebMarket.protocol;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +12,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.cedarsoftware.util.io.JsonReader;
 import com.survivorserver.GlobalMarket.Listing;
 import com.survivorserver.GlobalMarket.Mail;
 import com.survivorserver.GlobalMarket.Market;
+import com.survivorserver.GlobalMarket.Lib.MCPCPHelper;
 
 public class WebItem {
 
@@ -100,7 +103,17 @@ public class WebItem {
 		ItemStack stack = market.getStorage().getItem(listing.getItemId(), listing.getAmount());
 		maxDamage = stack.getType().getMaxDurability();
 		isTool = TOOLS.contains(stack.getType());
-		item = stack.serialize();
+		if(market.mcpcpSupportEnabled()) {
+			//Shrugs? I'm ok with this if it works
+			try {
+				item = JsonReader.jsonToMaps(MCPCPHelper.serialize(stack));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			item = stack.serialize();
+		}
 		
 		// Fix for enchanted book meta. Not serializable with Gson.
 		if (item.containsKey("meta")) {
@@ -139,7 +152,17 @@ public class WebItem {
 		ItemStack stack = market.getStorage().getItem(mail.getItemId(), mail.getAmount());
 		maxDamage = stack.getType().getMaxDurability();
 		isTool = TOOLS.contains(stack.getType());
-		item = stack.serialize();
+		if(market.mcpcpSupportEnabled()) {
+			//Shrugs? I'm ok with this if it works
+			try {
+				item = JsonReader.jsonToMaps(MCPCPHelper.serialize(stack));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			item = stack.serialize();
+		}
 		
 		// Fix for enchanted book meta. Not serializable with Gson.
 		if (item.containsKey("meta")) {
