@@ -1,5 +1,8 @@
 package com.survivorserver.Dasfaust.WebMarket.protocol;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum ViewType {
 	LISTINGS(0),
 	LISTINGS_OWNED(1),
@@ -26,5 +29,15 @@ public enum ViewType {
                 return As[i];
         }
         return ViewType.NONE;
+	}
+
+	public static Map<String,String> serialize() {
+		ViewType[] As = ViewType.values();
+		Map<String,String> map = new HashMap<String,String>();
+		for(int i = 0; i< As.length; i++) {
+			String val = As[i].name();
+			map.put(val.toLowerCase(), val);
+		}
+		return map;
 	}
 }

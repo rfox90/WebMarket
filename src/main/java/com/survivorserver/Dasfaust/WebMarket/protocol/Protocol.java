@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Protocol {
 
+	
 	// Reply types
 	public static int REPLY_GENERAL_FAILURE = 0;
 	public static int REPLY_GENERAL_SUCCESS = 1;
@@ -14,6 +15,7 @@ public class Protocol {
 	public static int REPLY_NOTIFICATION = 4;
 	public static int REPLY_TRANSACTION_FAILURE = 5;
 	public static int REPLY_TRANSACTION_SUCCESS = 6;
+	public static final int REPLY_WORLD_LIST = 7;
 	
 	// Status codes
 	public static int STATUS_INVALID_JSON = 0;
@@ -41,13 +43,14 @@ public class Protocol {
 	// Request codes
 	//replaced with RequestCode
 	
+	
 	// View types
 	//replaced with ViewType
 	
 	public Protocol() {}
 	
-	public static Map<String, Integer> serialize() {
-		Map<String, Integer> fields = new HashMap<String, Integer>();
+	public static Map<String, Object> serialize() {
+		Map<String, Object> fields = new HashMap<String, Object>();
 		Protocol prot = new Protocol();
 		try {
 			for (Field field : Protocol.class.getDeclaredFields()) {
@@ -58,6 +61,9 @@ public class Protocol {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		//Kinda meh about this oh well. Learning as I go
+		fields.put("RequestCode", RequestCode.serialize());
+		fields.put("ViewType", ViewType.serialize());
 		return fields;
 	}
 }

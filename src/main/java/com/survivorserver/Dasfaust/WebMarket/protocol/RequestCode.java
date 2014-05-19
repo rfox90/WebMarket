@@ -1,5 +1,8 @@
 package com.survivorserver.Dasfaust.WebMarket.protocol;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum RequestCode {
 	LOGIN(0),
 	LOGIN_XENFORO(3),
@@ -10,6 +13,7 @@ public enum RequestCode {
 	SEND(6),
 	CREATE_LISTING(7),
 	PICKUP(8),
+	WORLD_LIST(9),
 	NOOP(99);
 	private final int value;
 	
@@ -33,4 +37,14 @@ public enum RequestCode {
 	public String toString() {
 		return "Request ID is "+this.getValue();
 	}
+	public static Map<String,String> serialize() {
+		RequestCode[] As = RequestCode.values();
+		Map<String,String> map = new HashMap<String,String>();
+		for(int i = 0; i< As.length; i++) {
+			String val = As[i].name();
+			map.put(val.toLowerCase(), val);
+		}
+		return map;
+	}
+	
 }
