@@ -9,6 +9,7 @@ public class Request {
 	public Object data;
 	public int req;
 	public ViewerMeta meta;
+	public RequestCode code;
 	
 	public Request() {}
 	
@@ -24,5 +25,8 @@ public class Request {
 			e.printStackTrace();
 		}
 		return fields;
+	}
+	public RequestCode getCode() {
+		return RequestCode.fromInt(this.req);
 	}
 }

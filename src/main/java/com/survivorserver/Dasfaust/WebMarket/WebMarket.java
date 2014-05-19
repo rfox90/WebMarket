@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.survivorserver.Dasfaust.WebMarket.netty.WebSocketServer;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;
+import com.survivorserver.Dasfaust.WebMarket.protocol.ViewType;
 import com.survivorserver.GlobalMarket.Market;
 import com.survivorserver.GlobalMarket.MetricsLite;
 
@@ -60,19 +61,19 @@ public class WebMarket extends JavaPlugin {
 		return handler;
 	}
 	
-	public boolean disableCreation(int viewType) {
-		if (viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+	public boolean disableCreation(ViewType viewType) {
+		if (viewType == ViewType.CREATE_FROM_INV) {
 			return getConfig().getBoolean("interface.disable_create_from_inv");
-		} else if (viewType == Protocol.VIEWTYPE_CREATE_FROM_MAIL) {
+		} else if (viewType == ViewType.CREATE_FROM_MAIL) {
 			return getConfig().getBoolean("interface.disable_create_from_mail");
 		}
 		return false;
 	}
 	
-	public boolean disableSending(int viewType) {
-		if (viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+	public boolean disableSending(ViewType viewType) {
+		if (viewType == ViewType.CREATE_FROM_INV) {
 			return getConfig().getBoolean("interface.disable_sending_from_inv");
-		} else if (viewType == Protocol.VIEWTYPE_CREATE_FROM_MAIL) {
+		} else if (viewType == ViewType.CREATE_FROM_MAIL) {
 			return getConfig().getBoolean("interface.disable_sending_from_mail");
 		}
 		return false;

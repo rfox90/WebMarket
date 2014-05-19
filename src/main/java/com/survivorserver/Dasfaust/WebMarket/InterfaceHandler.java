@@ -23,6 +23,7 @@ import com.survivorserver.Dasfaust.WebMarket.protocol.ItemList;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Reply;
 import com.survivorserver.Dasfaust.WebMarket.protocol.SendRequest;
+import com.survivorserver.Dasfaust.WebMarket.protocol.ViewType;
 import com.survivorserver.Dasfaust.WebMarket.protocol.ViewerMeta;
 import com.survivorserver.Dasfaust.WebMarket.protocol.WebItem;
 import com.survivorserver.GlobalMarket.Listing;
@@ -67,17 +68,20 @@ public class InterfaceHandler extends Handler {
 	public ItemList getListings(ViewerMeta meta) {
 		if (meta.search == null || meta.search.length() <= 1) {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			for (Listing listing : storage.getListings(meta.name, SortMethod.DEFAULT,"")) {
+			List<Listing> list = storage.getListings(meta.name, SortMethod.DEFAULT,meta.getWorld());
+			market.log.info("Listings from global market contains "+list.size()+"Items");
+			for (Listing listing : list) {
 				listings.add(new WebItem(market, listing));
 			}
-			return new ItemList(Protocol.VIEWTYPE_LISTINGS, storage.getAllListings().size(), listings);
+			return new ItemList(ViewType.LISTINGS, storage.getAllListings().size(), listings);
 		} else {
 			List<WebItem> listings = new ArrayList<WebItem>();
-			SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.search,"");
+			SearchResult search = storage.getListings(meta.name, SortMethod.DEFAULT, meta.search,meta.getWorld());
+			market.log.info("Listings from global market contains "+search.getPage().size()+"Items");
 			for (Listing listing : search.getPage()) {
 				listings.add(new WebItem(market, listing));
 			}
-			return new ItemList(Protocol.VIEWTYPE_LISTINGS, search.getTotalFound(), listings);
+			return new ItemList(ViewType.LISTINGS, search.getTotalFound(), listings);
 		}
 	}
 	
@@ -86,7 +90,7 @@ public class InterfaceHandler extends Handler {
 		for (Listing listing : storage.getOwnedListings("",meta.name)) {
 			listings.add(new WebItem(market, listing));
 		}
-		return new ItemList(Protocol.VIEWTYPE_LISTINGS_OWNED, storage.getAllListings().size(), listings);
+		return new ItemList(ViewType.LISTINGS_OWNED, storage.getAllListings().size(), listings);
 	}
 	
 	public ItemList getMail(ViewerMeta meta) {
@@ -94,7 +98,7 @@ public class InterfaceHandler extends Handler {
 		for (Mail m : storage.getMail(meta.name, "", SortMethod.DEFAULT)) {
 			mail.add(new WebItem(market, m));
 		}
-		return new ItemList(Protocol.VIEWTYPE_MAIL, mail.size(), mail);
+		return new ItemList(ViewType.MAIL, mail.size(), mail);
 	}
 	
 	public Reply getItemsForCreation(ViewerMeta meta) {
@@ -118,7 +122,7 @@ public class InterfaceHandler extends Handler {
 			creation.add(inv.get(index));
 			index++;
 		}
-		return new Reply(Protocol.REPLY_UPDATE_VIEW, meta, new ItemList(Protocol.VIEWTYPE_CREATE_FROM_INV, creation.size(), inv.size(), creation));
+		return new Reply(Protocol.REPLY_UPDATE_VIEW, meta, new ItemList(ViewType.CREATE_FROM_INV, creation.size(), inv.size(), creation));
 	}
 	
 	public ItemList getMailForCreation(ViewerMeta meta) {
@@ -126,7 +130,7 @@ public class InterfaceHandler extends Handler {
 		for (Mail m : storage.getMail(meta.name,"", SortMethod.DEFAULT)) {
 			mail.add(new WebItem(market, m));
 		}
-		return new ItemList(Protocol.VIEWTYPE_CREATE_FROM_MAIL, mail.size(), mail);
+		return new ItemList(ViewType.CREATE_FROM_MAIL, mail.size(), mail);
 	}
 	
 	public Reply send(ViewerMeta meta, SendRequest request) {
@@ -136,7 +140,7 @@ public class InterfaceHandler extends Handler {
 		if (meta.name.equalsIgnoreCase(name)) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_BAD_REQUEST);
 		}
-		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV && web.getServer().getPlayer(meta.name) != null) {
+		if (meta.getType() == ViewType.CREATE_FROM_INV && web.getServer().getPlayer(meta.name) != null) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PLAYER_ONLINE);
 		}
 		if (web.getServer().getPlayer(name) == null) {
@@ -144,7 +148,7 @@ public class InterfaceHandler extends Handler {
 				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PLAYER_NOT_FOUND);
 			}
 		}
-		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+		if (meta.getType() == ViewType.CREATE_FROM_INV) {
 			IOfflinePlayer player = new IOfflinePlayer(meta.name);
 			if (!player.exists()) {
 				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);
@@ -180,7 +184,7 @@ public class InterfaceHandler extends Handler {
 		if (amount < 1) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_BAD_REQUEST);
 		}
-		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV && web.getServer().getPlayer(meta.name) != null) {
+		if (meta.getType() == ViewType.CREATE_FROM_INV && web.getServer().getPlayer(meta.name) != null) {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_PLAYER_ONLINE);
 		}
 		if (web.getServer().getPlayer(meta.name) == null) {
@@ -193,7 +197,7 @@ public class InterfaceHandler extends Handler {
 			return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_SELLING_TOO_MANY_ITEMS);
 		}
 		// TODO fees
-		if (meta.viewType == Protocol.VIEWTYPE_CREATE_FROM_INV) {
+		if (meta.getType() == ViewType.CREATE_FROM_INV) {
 			IOfflinePlayer player = new IOfflinePlayer(meta.name);
 			if (!player.exists()) {
 				return new Reply(Protocol.REPLY_TRANSACTION_FAILURE, meta, Protocol.STATUS_NO_INVENTORY);

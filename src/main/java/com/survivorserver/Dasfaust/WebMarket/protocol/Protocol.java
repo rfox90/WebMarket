@@ -39,22 +39,10 @@ public class Protocol {
 	public static int STATUS_DISABLED_BY_SERVER = 20;
 	
 	// Request codes
-	public static int REQUEST_LOGIN = 0;
-	public static int REQUEST_LOGIN_XENFORO = 3;
-	public static int REQUEST_LOGOUT = 1;
-	public static int REQUEST_UPDATE_VIEW = 2;
-	public static int REQUEST_BUY = 4;
-	public static int REQUEST_CANCEL = 5;
-	public static int REQUEST_SEND = 6;
-	public static int REQUEST_CREATE_LISTING = 7;
-	public static int REQUEST_PICKUP = 8;
+	//replaced with RequestCode
 	
 	// View types
-	public static int VIEWTYPE_LISTINGS = 0;
-	public static int VIEWTYPE_LISTINGS_OWNED = 1;
-	public static int VIEWTYPE_MAIL = 2;
-	public static int VIEWTYPE_CREATE_FROM_INV = 3;
-	public static int VIEWTYPE_CREATE_FROM_MAIL = 4;
+	//replaced with ViewType
 	
 	public Protocol() {}
 	

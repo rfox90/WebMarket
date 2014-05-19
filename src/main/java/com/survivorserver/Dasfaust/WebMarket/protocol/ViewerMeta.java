@@ -18,6 +18,7 @@ public class ViewerMeta {
 	public int totalSelling;
 	public int totalListings;
 	public int totalMail;
+	public String world;
 	
 	public ViewerMeta() {}
 	
@@ -33,5 +34,14 @@ public class ViewerMeta {
 			e.printStackTrace();
 		}
 		return fields;
+	}
+	public ViewType getType() {
+		return ViewType.fromInt(this.viewType);
+	}
+	public String getWorld() {
+		if(this.world != null) {
+			return this.world;
+		} 
+		return "world";
 	}
 }

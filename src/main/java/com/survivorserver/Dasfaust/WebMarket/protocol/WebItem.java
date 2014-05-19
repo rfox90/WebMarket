@@ -124,6 +124,7 @@ public class WebItem {
 		ItemStack singular = stack.clone();
 		singular.setAmount(1);
 		friendlyItemName = market.getItemName(singular);
+		market.log.info("Adding item with friendly name "+ friendlyItemName);
 		seller = listing.getSeller();
 		price = listing.getPrice();
 		friendlyPrice = market.getEcon().format(price);

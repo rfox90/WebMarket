@@ -3,7 +3,6 @@ package com.survivorserver.Dasfaust.WebMarket.netty;
 import java.util.logging.Logger;
 
 import org.bukkit.scheduler.BukkitRunnable;
-
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
 import org.bukkit.craftbukkit.libs.com.google.gson.internal.StringMap;
@@ -15,6 +14,7 @@ import com.survivorserver.Dasfaust.WebMarket.protocol.CreateRequest;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Protocol;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Reply;
 import com.survivorserver.Dasfaust.WebMarket.protocol.Request;
+import com.survivorserver.Dasfaust.WebMarket.protocol.RequestCode;
 import com.survivorserver.Dasfaust.WebMarket.protocol.SendRequest;
 
 import io.netty.buffer.ByteBuf;
@@ -25,7 +25,7 @@ import io.netty.util.CharsetUtil;
 
 public class WebSocketSession {
 
-	private Logger log;
+	public Logger log;
 	private WebMarket web;
 	private ChannelHandlerContext ctx;
 	private Gson gson;
@@ -60,9 +60,9 @@ public class WebSocketSession {
 		}
 		// Are we logged in?
 		if (viewer == null) {
-			if (req.req != Protocol.REQUEST_LOGIN) {
+			if (req.getCode() != RequestCode.LOGIN) {
 				log.info(ctx.channel().remoteAddress().toString());
-				if (req.req == Protocol.REQUEST_LOGIN_XENFORO && web.auth.canAuthorize(ctx.channel().remoteAddress().toString())) {
+				if (req.getCode() == RequestCode.LOGIN_XENFORO && web.auth.canAuthorize(ctx.channel().remoteAddress().toString())) {
 					web.auth.addUser(req.meta.name, req.meta.password);
 				} else {
 					send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_LOGIN_EXPECTED));
@@ -90,13 +90,14 @@ public class WebSocketSession {
 			// Update the viewer's data
 			viewer.updateMeta(web.market, req.meta);
 			// Handle their request
-			switch (req.req) {
+			this.log.info(req.getClass().toString());
+			switch (req.getCode()) {
 			// Logout
-			case 1:
+			case LOGOUT:
 				send(viewer.onLogout());
 				break;
 			// Update view
-			case 2:
+			case UPDATE_VIEW:
 				switch (viewer.getMeta().viewType) {
 				case 0:
 					send(viewer.onRequestListings(web.getHandler()));
@@ -118,7 +119,7 @@ public class WebSocketSession {
 				}
 				break;
 			// Purchase
-			case 4:
+			case BUY:
 				new BukkitRunnable() {
 					@Override
 					public void run() {
@@ -131,7 +132,7 @@ public class WebSocketSession {
 				}.runTask(web);
 				break;
 			// Cancel
-			case 5:
+			case CANCEL:
 				new BukkitRunnable() {
 					@Override
 					public void run() {
@@ -144,11 +145,11 @@ public class WebSocketSession {
 				}.runTask(web);
 				break;
 			// Send
-			case 6:
+			case SEND:
 				new BukkitRunnable() {
 					@Override
 					public void run() {
-						if (!web.disableSending(req.meta.viewType)) {
+						if (!web.disableSending(req.meta.getType())) {
 							try {
 								@SuppressWarnings("unchecked")
 								StringMap<Object> map = (StringMap<Object>) req.data;
@@ -165,11 +166,11 @@ public class WebSocketSession {
 				}.runTask(web);
 				break;
 			// Create
-			case 7:
+			case CREATE_LISTING:
 				new BukkitRunnable() {
 					@Override
 					public void run() {
-						if (!web.disableCreation(req.meta.viewType)) {
+						if (!web.disableCreation(req.meta.getType())) {
 							try {
 								@SuppressWarnings("unchecked")
 								StringMap<Object> map = (StringMap<Object>) req.data;
@@ -184,7 +185,7 @@ public class WebSocketSession {
 						}
 					}
 				}.runTask(web);
-			case 8:
+			case PICKUP:
 				new BukkitRunnable() {
 					@Override
 					public void run() {
@@ -201,6 +202,7 @@ public class WebSocketSession {
 				}.runTask(web);
 				break;
 			default:
+				this.log.info("Unmapable request");
 				send(new Reply(Protocol.REPLY_GENERAL_FAILURE, null, Protocol.STATUS_UNKNOWN_REQUEST));
 				break;
 			}

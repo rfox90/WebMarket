@@ -41,19 +41,23 @@ public class WebViewer {
 	}
 
 	public Reply onRequestListings(InterfaceHandler handler) {
+		this.session.log.info("Requesting Listings");
 		return new Reply(Protocol.REPLY_UPDATE_VIEW, meta, handler.getListings(meta));
 	}
 	
 	public Reply onLogout() {
+		this.session.log.info("Requesting Logout");
 		session.getContext().disconnect();
 		return new Reply(Protocol.REPLY_GENERAL_SUCCESS, null, Protocol.STATUS_LOGGED_OUT);
 	}
 	
 	public Reply onRequestListingsOwned(InterfaceHandler handler) {
+		this.session.log.info("Requesting Own listings");
 		return new Reply(Protocol.REPLY_UPDATE_VIEW, meta, handler.getOwnedListings(meta));
 	}
 	
 	public Reply onRequestMail(InterfaceHandler handler) {
+		this.session.log.info("Requesting mail");
 		return new Reply(Protocol.REPLY_UPDATE_VIEW, meta, handler.getMail(meta));
 	}
 	
