@@ -20,6 +20,7 @@ public class WebMarket extends JavaPlugin {
 	private WebSocketServer server;
 	private InterfaceHandler handler;
 	public AuthManager auth;
+	public boolean mcpcp = false;
 	
 	public void onEnable() {
 		log = getLogger();
@@ -43,6 +44,11 @@ public class WebMarket extends JavaPlugin {
 			    log.info("Failed to start Metrics!");
 			}
 		}
+		try {
+            Class.forName("me.dasfaust.GlobalMarket.MarketCompanion");
+            log.info("Market Forge mod detected!");
+            mcpcp = true;
+        } catch(Exception ignored) {}
 		handler = new InterfaceHandler(this);
 		market.getInterfaceHandler().registerHandler(handler);
 		auth = new AuthManager(this);
